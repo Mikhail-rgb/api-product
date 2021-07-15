@@ -14,8 +14,7 @@ class ErrorController
         return new JsonResponse([
             'code' => $exception->getCode(),
             'message' => $exception->getMessage(),
-        ],
-        Response::HTTP_SERVICE_UNAVAILABLE
+        ]
         );
     }
 }

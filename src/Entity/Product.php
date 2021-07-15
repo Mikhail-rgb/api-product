@@ -20,7 +20,7 @@ class Product
     private ?int $id = null;
 
     /**
-     * @ORM\Column(type="string", length=255, name="sku", unique=true)
+     * @ORM\Column(type="string", length=255, name="sku")
      */
     private string $sku;
 
@@ -56,11 +56,7 @@ class Product
     public function getId(): int
     {
         if ($this->id === null) {
-            throw new RuntimeException(
-                sprintf(
-                    'Product id not found'
-                )
-            );
+            throw new RuntimeException('Product creation failed');
         }
 
         return $this->id;
@@ -70,4 +66,59 @@ class Product
     {
         $this->title = $title;
     }
+
+
+    public function setAmount(int $amount): void
+    {
+        $this->amount = $amount;
+    }
+
+    public function setCurrency(string $currency): void
+    {
+        $this->currency = $currency;
+    }
+
+
+    public function setType(string $type): void
+    {
+        $this->type = $type;
+    }
+
+
+    public function setSku(string $sku): void
+    {
+        $this->sku = $sku;
+    }
+
+
+    public function getSku(): string
+    {
+        return $this->sku;
+    }
+
+
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+
+    public function getAmount(): int
+    {
+        return $this->amount;
+    }
+
+
+    public function getCurrency(): string
+    {
+        return $this->currency;
+    }
+
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+
 }

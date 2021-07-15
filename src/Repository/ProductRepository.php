@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -23,6 +25,9 @@ class ProductRepository extends ServiceEntityRepository
 
     public function create(string $sku, string $title, int $amount, string $currency, string $type): Product
     {
+        //If products with different types have the same SKU -> error
+        //$this->checkSKU($sku, $type);
+
         $product = new Product($sku, $title, $amount, $currency, $type);
 
         $this->save($product);
@@ -30,34 +35,89 @@ class ProductRepository extends ServiceEntityRepository
         return $product;
     }
 
-    public function findBySKU(string $sku): Product
+    private function checkSKU(string $sku, string $type): void
+    {
+        $products = $this->findBy(['sku' => $sku]);
+        $productsAmount = count($products);
+
+        if($productsAmount > 1)
+        {
+            foreach ($products as $product)
+            {
+                if($product['type'] != $type)
+                {
+                    throw new RuntimeException('The same SKU with different types');
+                }
+            }
+        }
+    }
+
+    public function findBySKU(string $sku): array
     {
         $products = $this->findBy(['sku' => $sku]);
 
         if (!$products) {
-            throw new RuntimeException();
+            throw new RuntimeException('Product sku not found');
         }
 
-        if (count($products) > 1) {
-            throw new RuntimeException('More than 1');
-        }
-
-        return $products[0];
+        return $products;
     }
 
-    public function updateById(string $id, string $newTitle): Product
+    public function findByID(int $id): Product
     {
         $product = $this->find($id);
 
         if (!$product) {
-            throw new RuntimeException();
+            throw new RuntimeException('Product id not found');
         }
 
-        $product->setTitle($newTitle);
+        return $product;
+    }
+
+    public function updateById(int $id, string $body): Product
+    {
+        $product = $this->find($id);
+
+        if (!$product) {
+            throw new RuntimeException('Product id not found');
+        }
+
+        //$product->setTitle($newTitle);
 
         $this->save($product);
 
         return $product;
+    }
+
+    public function deleteByID(int $id): void
+    {
+        $product = $this->find($id);
+
+        if (!$product) {
+            throw new RuntimeException('Product id not found');
+        }
+
+        $this->delete($product);
+    }
+
+    public function deleteBySKU(string $sku): void
+    {
+        $products = $this->findBy(['sku' => $sku]);
+
+        if (!$products) {
+            throw new RuntimeException('Product sku not found');
+        }
+
+        foreach($products as $product)
+        {
+            $this->delete($product);
+        }
+    }
+
+    private function delete(Product $product): void
+    {
+        $this->_em->remove($product);
+        $this->_em->flush();
     }
 
     private function save(Product $product): void
@@ -65,4 +125,10 @@ class ProductRepository extends ServiceEntityRepository
         $this->_em->persist($product);
         $this->_em->flush();
     }
+
+    public function getProductsArray(): array
+    {
+        return $this->findAll();
+    }
+
 }
