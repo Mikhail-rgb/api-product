@@ -42,6 +42,33 @@ class ApiController extends AbstractController
     }
 
     /**
+     * @Route("/api/product/upd/id/{id}", name="product_update_by_id", methods={"PUT"})
+     */
+    public function updateProductByID(Request $request, int $id): Response
+    {
+        $body = json_decode((string)$request->getContent(), true);
+
+        $product = $this->productRepository->updateById($id, $body);
+        $productJson = $this->serializer->serialize($product, 'json');
+
+        return new JsonResponse(json_decode($productJson, true));
+    }
+
+    /**
+     * @Route("/api/product/upd/sku/{sku}", name="product_update_by_sku", methods={"PUT"})
+     */
+    public function updateProductsBySKU(Request $request, string $sku): Response
+    {
+        $body = json_decode((string)$request->getContent(), true);
+
+        $products = $this->productRepository->updateBySKU($sku, $body);
+        $productsJson = $this->serializer->serialize($products, 'json');
+
+        return new JsonResponse(json_decode($productsJson, true));
+    }
+
+
+    /**
      * @Route("/api/product/del/id/{id}", name="product_delete_by_id", methods={"DELETE"})
      */
     public function deleteProductByID(int $id): Response
@@ -59,17 +86,6 @@ class ApiController extends AbstractController
         $this->productRepository->deleteBySKU($sku);
 
         return new JsonResponse(['message' => "Product(s) with sku = $sku deleted"]);
-    }
-
-
-    /**
-     * @Route("/api/product/update/id/{id}", name="product_update_by_id", methods={"PUT"})
-     */
-    public function updateProductByID(Request $request, int $id): Response
-    {
-        $body = json_decode((string)$request->getContent(), true);
-
-        $product = $this->productRepository->updateById($id, $body);
     }
 
     /**

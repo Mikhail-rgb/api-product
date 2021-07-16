@@ -5,6 +5,7 @@ namespace App\Entity;
 
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\Types\Boolean;
 use RuntimeException;
 
 /**
@@ -46,11 +47,11 @@ class Product
 
     public function __construct(string $sku, string $title, int $amount, string $currency, string $type)
     {
-        $this->sku = $sku;
-        $this->title = $title;
-        $this->amount = $amount;
-        $this->currency = $currency;
-        $this->type = $type;
+        $this->setSku($sku);
+        $this->setTitle($title);
+        $this->setAmount($amount);
+        $this->setCurrency($currency);
+        $this->setType($type);
     }
 
     public function getId(): int
@@ -64,29 +65,55 @@ class Product
 
     public function setTitle(string $title): void
     {
+        if(!$title)
+        {
+            throw new RuntimeException('Product title not specified');
+        }
+
         $this->title = $title;
     }
 
 
     public function setAmount(int $amount): void
     {
+        if($amount === null)
+        {
+            throw new RuntimeException('Product amount not specified');
+        }
+        else if($amount < 0)
+        {
+            throw new RuntimeException('Product amount cannot be negative');
+        }
+
         $this->amount = $amount;
     }
 
     public function setCurrency(string $currency): void
     {
+        $this->checkCurrency($currency);
+
         $this->currency = $currency;
     }
 
 
     public function setType(string $type): void
     {
+        if(!$type)
+        {
+            throw new RuntimeException('Product type not specified');
+        }
+
         $this->type = $type;
     }
 
 
     public function setSku(string $sku): void
     {
+        if(!$sku)
+        {
+            throw new RuntimeException('Product SKU not specified');
+        }
+
         $this->sku = $sku;
     }
 
@@ -120,5 +147,23 @@ class Product
         return $this->type;
     }
 
+    private function checkCurrency(string $currency): void
+    {
+        if(!$currency)
+        {
+            throw new RuntimeException('Product currency not specified');
+        }
+
+        $usableCurrency = array(
+        "rub" => "rub",
+        "usd" => "usd",
+        "eur" => "eur",
+        );
+
+        if(!in_array($currency, $usableCurrency))
+        {
+            throw new RuntimeException('Unusable currency');
+        }
+    }
 
 }

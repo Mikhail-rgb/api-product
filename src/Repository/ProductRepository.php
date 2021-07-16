@@ -26,7 +26,7 @@ class ProductRepository extends ServiceEntityRepository
     public function create(string $sku, string $title, int $amount, string $currency, string $type): Product
     {
         //If products with different types have the same SKU -> error
-        //$this->checkSKU($sku, $type);
+        $this->checkSkuAndType($sku, $type);
 
         $product = new Product($sku, $title, $amount, $currency, $type);
 
@@ -35,16 +35,16 @@ class ProductRepository extends ServiceEntityRepository
         return $product;
     }
 
-    private function checkSKU(string $sku, string $type): void
+    private function checkSkuAndType(string $sku, string $type): void
     {
         $products = $this->findBy(['sku' => $sku]);
         $productsAmount = count($products);
 
-        if($productsAmount > 1)
+        if($productsAmount >= 1)
         {
             foreach ($products as $product)
             {
-                if($product['type'] != $type)
+                if($product->getType() != $type)
                 {
                     throw new RuntimeException('The same SKU with different types');
                 }
@@ -74,7 +74,7 @@ class ProductRepository extends ServiceEntityRepository
         return $product;
     }
 
-    public function updateById(int $id, string $body): Product
+    public function updateById(int $id, array $body): Product
     {
         $product = $this->find($id);
 
@@ -82,11 +82,27 @@ class ProductRepository extends ServiceEntityRepository
             throw new RuntimeException('Product id not found');
         }
 
-        //$product->setTitle($newTitle);
-
+        $this->update($product, $body);
         $this->save($product);
 
         return $product;
+    }
+
+    public function updateBySKU(string $sku, array $body): array
+    {
+        $products = $this->findBy(['sku' => $sku]);
+
+        if (!$products) {
+            throw new RuntimeException('Product id not found');
+        }
+
+        foreach($products as $product)
+        {
+            $this->update($product, $body);
+            $this->save($product);
+        }
+
+        return $products;
     }
 
     public function deleteByID(int $id): void
@@ -111,6 +127,27 @@ class ProductRepository extends ServiceEntityRepository
         foreach($products as $product)
         {
             $this->delete($product);
+        }
+    }
+
+    private function update(Product $product, array $body):void
+    {
+        foreach($body as $key => $value)
+        {
+            switch ($key)
+            {
+                case "sku":
+                    $this->checkSkuAndType($value, $product->getType());
+                    $product->setSku($value);
+                    break;
+                case "title": $product->setTitle($value); break;
+                case "amount": $product->setAmount((int)$value); break;
+                case "currency": $product->setCurrency($value); break;
+                case "type":
+                    $this->checkSkuAndType($product->getSku(), $value);
+                    $product->setType($value);
+                    break;
+            }
         }
     }
 
