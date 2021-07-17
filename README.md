@@ -40,36 +40,31 @@ http://127.0.0.1:8000/api/product
 
 Пример запроса:
 
+```json
 {
-
     "sku": "UBS-PP-TST",
-    
     "title": "Prince of Persia: The Sands of Time",
-    
     "amount": 25000,
-    
     "currency": "rub",
-    
     "type": "games"
 }
+```
 
 Пример успешного ответа:
-
+```json
 {
-
     "id": 27
-    
 }
-
+```
 Пример неуспешного ответа:
 
+```json
 {
-
     "code": 2,
-    
     "message": "Product title not specified"
-    
 }
+```
+
 
 
 ___
@@ -109,42 +104,37 @@ http://127.0.0.1:8000/api/product/sku/{sku}
 
 Пример запроса:
 
+```json
 {
-
     "amount": 287,
-    
     "currency": "eur"
-    
 }
+```
+
 
 Пример успешного ответа:
 
+```json
 {
-
     "id": 27,
-    
     "sku": "UBS-PP-TST",
-    
     "title": "Prince of Persia: The Sands of Time",
-    
     "amount": 287,
-    
     "currency": "eur",
-    
     "type": "games"
-    
 }
+```
+
 
 Пример неуспешного ответа:
 
+```json
 {
-
     "code": 4,
-    
     "message": "Unusable currency"
-    
 }
 
+```
 
 ___
 ## Удаление товара
@@ -163,22 +153,21 @@ http://127.0.0.1:8000/api/product/sku/{sku}
 
 Пример успешного ответа:
 
+```json
 {
-
     "message": "Product(s) with sku SMTH-WT-L deleted"
-    
 }
+```
+
 
 Пример неуспешного ответа:
 
+```json
 {
-
     "code": 6,
-    
     "message": "Product sku not found"
-    
 }
-
+```
 
 ___
 ## Получение информации о товаре
@@ -197,32 +186,26 @@ http://127.0.0.1:8000/api/product/sku/{sku}
 
 Пример успешного ответа:
 
+```json
 {
-
     "id": 31,
-    
     "sku": "DС-ETH",
-    
     "title": "Ethereum",
-    
     "amount": 188666,
-    
     "currency": "usd",
-    
     "type": "digital currency"
-    
 }
+```
+
 
 Пример неуспешного ответа:
 
+```json
 {
-
     "code": 6,
-    
     "message": "Product id not found"
-    
 }
-
+```
 
 ___
 ## Получение каталога товаров
@@ -238,186 +221,105 @@ http://127.0.0.1:8000/api/product
 
 Пример успешного ответа:
 
+```json
 [
-
     {
-    
         "id": 27,
-        
         "sku": "UBS-PP-TST",
-        
         "title": "Prince of Persia: The Sands of Time",
-        
         "amount": 287,
-        
         "currency": "eur",
-        
         "type": "games"
-        
     },
-    
     {
-    
         "id": 28,
-        
         "sku": "SMTH-WT-S",
-        
         "title": "White T-Shirt",
-        
         "amount": 1000,
-        
         "currency": "usd",
-        
         "type": "merch"
-        
     },
-    
     {
-    
         "id": 29,
-        
         "sku": "SMTH-WT-S",
-        
         "title": "White T-Shirt",
-        
         "amount": 1000,
-        
         "currency": "usd",
-        
         "type": "merch"
-        
     },
-    
     {
-    
         "id": 31,
-        
         "sku": "DС-ETH",
-        
         "title": "Ethereum",
-        
         "amount": 188666,
-        
         "currency": "usd",
-        
         "type": "digital currency"
-        
     },
-    
     {
-    
         "id": 32,
-        
         "sku": "DС-BTC",
-        
         "title": "Bitcoin",
-        
         "amount": 3161790,
-        
         "currency": "usd",
-        
         "type": "digital currency"
-        
     }
-    
 ]
+```
+
 
 С целью снижения нагрузки на сервис был предусмотрен метод вывода каталога товаров по частям (5 товаров за раз). Для этого был использован пакет "knp-paginator-bundle".
 Чтобы вывести следующие товары, в запросе нужно указать номер страницы: http://127.0.0.1:8000/api/product/?page=2
 
 Пример успешного ответа:
-
+```json
 [
-
     {
-    
         "id": 33,
-        
         "sku": "JKR-HP-CS",
-        
         "title": "Harry Potter and Chamber of Secrets",
-        
         "amount": 50000,
-        
         "currency": "rub",
-        
         "type": "books"
-        
     },
-    
     {
-    
         "id": 34,
-        
         "sku": "RG-GTA-V",
-        
         "title": "Grand Theft Auto V",
-        
         "amount": 1000,
-        
         "currency": "eur",
-        
         "type": "games"
-        
     },
-    
     {
-    
         "id": 35,
-        
         "sku": "UBS-AC-1",
-        
         "title": "Assassin’s Creed",
-        
         "amount": 1000,
-        
         "currency": "eur",
-        
         "type": "games"
-        
     },
-    
     {
-    
         "id": 36,
-        
         "sku": "SMTH-WS-58",
-        
         "title": "White Shorts",
-        
         "amount": 15000,
-        
         "currency": "rub",
-        
         "type": "merch"
-        
     },
-    
     {
-    
         "id": 37,
-        
         "sku": "EMR-TC",
-        
         "title": "Three Comrades",
-        
         "amount": 75000,
-        
         "currency": "rub",
-        
         "type": "books"
-        
     }
-    
 ]
-
+```
 
 Пример неуспешного ответа:
-
+```json
 {
-
     "code": 6,
-    
     "message": "Products not found"
-    
 }
+```
