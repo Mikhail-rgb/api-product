@@ -43,7 +43,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/api/product/upd/id/{id}", name="product_update_by_id", methods={"PUT"})
+     * @Route("/api/product/id/{id}", name="product_update_by_id", methods={"PUT"})
      */
     public function updateProductByID(Request $request, int $id): Response
     {
@@ -55,13 +55,14 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/api/product/upd/sku/{sku}", name="product_update_by_sku", methods={"PUT"})
+     * @Route("/api/product/sku/{sku}", name="product_update_by_sku", methods={"PUT"})
      */
     public function updateProductsBySKU(Request $request, PaginatorInterface $paginator, string $sku): Response
     {
         $body = json_decode((string)$request->getContent(), true);
         $products = $this->productRepository->updateBySKU($sku, $body);
-        $paginatedProducts = $this->productRepository->pagProducts($products, $paginator, $request);
+        $page = $request->query->getInt('page', 1);
+        $paginatedProducts = $this->productRepository->paginationProducts($products, $paginator, $page);
         $productsJson = $this->serializer->serialize($paginatedProducts, 'json');
 
         return new JsonResponse(json_decode($productsJson, true));
@@ -69,7 +70,7 @@ class ApiController extends AbstractController
 
 
     /**
-     * @Route("/api/product/del/id/{id}", name="product_delete_by_id", methods={"DELETE"})
+     * @Route("/api/product/id/{id}", name="product_delete_by_id", methods={"DELETE"})
      */
     public function deleteProductByID(int $id): Response
     {
@@ -79,7 +80,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/api/product/del/sku/{sku}", name="product_delete_by_sku", methods={"DELETE"})
+     * @Route("/api/product/sku/{sku}", name="product_delete_by_sku", methods={"DELETE"})
      */
     public function deleteProductBySKU(string $sku): Response
     {
@@ -94,7 +95,8 @@ class ApiController extends AbstractController
     public function returnAllProducts(Request $request, PaginatorInterface $paginator): Response
     {
         $products = $this->productRepository->getProductsArray();
-        $paginatedProducts = $this->productRepository->pagProducts($products, $paginator, $request);
+        $page = $request->query->getInt('page', 1);
+        $paginatedProducts = $this->productRepository->paginationProducts($products, $paginator, $page);
         $productsJson = $this->serializer->serialize($paginatedProducts, 'json');
 
         return new JsonResponse(json_decode($productsJson, true));
@@ -117,7 +119,8 @@ class ApiController extends AbstractController
     public function returnProductBySKU(Request $request, PaginatorInterface $paginator, string $sku): Response
     {
         $products = $this->productRepository->findBySKU($sku);
-        $paginatedProducts = $this->productRepository->pagProducts($products, $paginator, $request);
+        $page = $request->query->getInt('page', 1);
+        $paginatedProducts = $this->productRepository->paginationProducts($products, $paginator, $page);
         $productsJson = $this->serializer->serialize($paginatedProducts, 'json');
 
         return new JsonResponse(json_decode($productsJson, true));

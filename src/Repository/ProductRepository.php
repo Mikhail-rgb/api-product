@@ -189,12 +189,12 @@ class ProductRepository extends ServiceEntityRepository
         return $this->pageSize;
     }
 
-    public function pagProducts(array $products, \Knp\Component\Pager\PaginatorInterface $paginator,
-                                Request $request): \Knp\Component\Pager\Pagination\PaginationInterface
+    public function paginationProducts(array $products, \Knp\Component\Pager\PaginatorInterface $paginator,
+                                       int $page): \Knp\Component\Pager\Pagination\PaginationInterface
     {
         return $paginator->paginate(
             $products,
-            $request->query->getInt('page', 1),
+            $page,
             $this->getPageSize()
         );
 
