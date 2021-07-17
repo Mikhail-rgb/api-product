@@ -278,3 +278,10 @@ http://127.0.0.1:8000/api/product
         "type": "books"
     }
 ]
+
+
+Пример неуспешного ответа:
+{
+    "code": 6,
+    "message": "Products not found"
+}
