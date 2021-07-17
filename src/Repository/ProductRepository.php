@@ -172,7 +172,13 @@ class ProductRepository extends ServiceEntityRepository
 
     public function getProductsArray(): array
     {
-        return $this->findAll();
+        $products = $this->findAll();
+        if(!$products)
+        {
+            throw new RuntimeException('Cannot find any product' , 8);
+        }
+
+        return $products;
     }
 
     /**
