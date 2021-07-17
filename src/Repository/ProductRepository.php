@@ -175,7 +175,7 @@ class ProductRepository extends ServiceEntityRepository
         $products = $this->findAll();
         if(!$products)
         {
-            throw new RuntimeException('Cannot find any product' , 8);
+            throw new RuntimeException('Products not found' , 6);
         }
 
         return $products;
