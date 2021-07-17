@@ -57,7 +57,7 @@ class Product
     public function getId(): int
     {
         if ($this->id === null) {
-            throw new RuntimeException('Product creation failed');
+            throw new RuntimeException('Product creation failed', 1);
         }
 
         return $this->id;
@@ -67,7 +67,7 @@ class Product
     {
         if(!$title)
         {
-            throw new RuntimeException('Product title not specified');
+            throw new RuntimeException('Product title not specified', 2);
         }
 
         $this->title = $title;
@@ -78,11 +78,11 @@ class Product
     {
         if($amount === null)
         {
-            throw new RuntimeException('Product amount not specified');
+            throw new RuntimeException('Product amount not specified', 2);
         }
         else if($amount < 0)
         {
-            throw new RuntimeException('Product amount cannot be negative');
+            throw new RuntimeException('Product amount cannot be negative', 3);
         }
 
         $this->amount = $amount;
@@ -100,7 +100,7 @@ class Product
     {
         if(!$type)
         {
-            throw new RuntimeException('Product type not specified');
+            throw new RuntimeException('Product type not specified', 2);
         }
 
         $this->type = $type;
@@ -111,7 +111,7 @@ class Product
     {
         if(!$sku)
         {
-            throw new RuntimeException('Product SKU not specified');
+            throw new RuntimeException('Product SKU not specified', 2);
         }
 
         $this->sku = $sku;
@@ -151,7 +151,7 @@ class Product
     {
         if(!$currency)
         {
-            throw new RuntimeException('Product currency not specified');
+            throw new RuntimeException('Product currency not specified', 2);
         }
 
         $usableCurrency = array(
@@ -162,7 +162,7 @@ class Product
 
         if(!in_array($currency, $usableCurrency))
         {
-            throw new RuntimeException('Unusable currency');
+            throw new RuntimeException('Unusable currency', 4);
         }
     }
 

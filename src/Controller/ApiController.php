@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Repository\ProductRepository;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -47,7 +48,6 @@ class ApiController extends AbstractController
     public function updateProductByID(Request $request, int $id): Response
     {
         $body = json_decode((string)$request->getContent(), true);
-
         $product = $this->productRepository->updateById($id, $body);
         $productJson = $this->serializer->serialize($product, 'json');
 
@@ -57,12 +57,12 @@ class ApiController extends AbstractController
     /**
      * @Route("/api/product/upd/sku/{sku}", name="product_update_by_sku", methods={"PUT"})
      */
-    public function updateProductsBySKU(Request $request, string $sku): Response
+    public function updateProductsBySKU(Request $request, PaginatorInterface $paginator, string $sku): Response
     {
         $body = json_decode((string)$request->getContent(), true);
-
         $products = $this->productRepository->updateBySKU($sku, $body);
-        $productsJson = $this->serializer->serialize($products, 'json');
+        $paginatedProducts = $this->productRepository->pagProducts($products, $paginator, $request);
+        $productsJson = $this->serializer->serialize($paginatedProducts, 'json');
 
         return new JsonResponse(json_decode($productsJson, true));
     }
@@ -91,10 +91,11 @@ class ApiController extends AbstractController
     /**
      * @Route("/api/product", name="products_return", methods={"GET"})
      */
-    public function returnAllProducts(): Response
+    public function returnAllProducts(Request $request, PaginatorInterface $paginator): Response
     {
         $products = $this->productRepository->getProductsArray();
-        $productsJson = $this->serializer->serialize($products, 'json');
+        $paginatedProducts = $this->productRepository->pagProducts($products, $paginator, $request);
+        $productsJson = $this->serializer->serialize($paginatedProducts, 'json');
 
         return new JsonResponse(json_decode($productsJson, true));
     }
@@ -113,10 +114,11 @@ class ApiController extends AbstractController
     /**
      * @Route("/api/product/sku/{sku}", name="product_return_by_sku", methods={"GET"})
      */
-    public function returnProductBySKU(string $sku): Response
+    public function returnProductBySKU(Request $request, PaginatorInterface $paginator, string $sku): Response
     {
         $products = $this->productRepository->findBySKU($sku);
-        $productsJson = $this->serializer->serialize($products, 'json');
+        $paginatedProducts = $this->productRepository->pagProducts($products, $paginator, $request);
+        $productsJson = $this->serializer->serialize($paginatedProducts, 'json');
 
         return new JsonResponse(json_decode($productsJson, true));
     }

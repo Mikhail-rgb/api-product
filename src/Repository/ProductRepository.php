@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Product;
@@ -18,6 +19,9 @@ use RuntimeException;
  */
 class ProductRepository extends ServiceEntityRepository
 {
+    //max amount of elements on page
+    private int $pageSize = 5;
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Product::class);
@@ -46,7 +50,7 @@ class ProductRepository extends ServiceEntityRepository
             {
                 if($product->getType() != $type)
                 {
-                    throw new RuntimeException('The same SKU with different types');
+                    throw new RuntimeException('The same SKU with different types', 5);
                 }
             }
         }
@@ -57,7 +61,7 @@ class ProductRepository extends ServiceEntityRepository
         $products = $this->findBy(['sku' => $sku]);
 
         if (!$products) {
-            throw new RuntimeException('Product sku not found');
+            throw new RuntimeException('Product sku not found', 6);
         }
 
         return $products;
@@ -68,7 +72,7 @@ class ProductRepository extends ServiceEntityRepository
         $product = $this->find($id);
 
         if (!$product) {
-            throw new RuntimeException('Product id not found');
+            throw new RuntimeException('Product id not found', 6);
         }
 
         return $product;
@@ -79,7 +83,7 @@ class ProductRepository extends ServiceEntityRepository
         $product = $this->find($id);
 
         if (!$product) {
-            throw new RuntimeException('Product id not found');
+            throw new RuntimeException('Product id not found', 6);
         }
 
         $this->update($product, $body);
@@ -93,7 +97,7 @@ class ProductRepository extends ServiceEntityRepository
         $products = $this->findBy(['sku' => $sku]);
 
         if (!$products) {
-            throw new RuntimeException('Product id not found');
+            throw new RuntimeException('Product sku not found', 6);
         }
 
         foreach($products as $product)
@@ -110,7 +114,7 @@ class ProductRepository extends ServiceEntityRepository
         $product = $this->find($id);
 
         if (!$product) {
-            throw new RuntimeException('Product id not found');
+            throw new RuntimeException('Product id not found', 6);
         }
 
         $this->delete($product);
@@ -121,7 +125,7 @@ class ProductRepository extends ServiceEntityRepository
         $products = $this->findBy(['sku' => $sku]);
 
         if (!$products) {
-            throw new RuntimeException('Product sku not found');
+            throw new RuntimeException('Product sku not found', 6);
         }
 
         foreach($products as $product)
@@ -147,6 +151,9 @@ class ProductRepository extends ServiceEntityRepository
                     $this->checkSkuAndType($product->getSku(), $value);
                     $product->setType($value);
                     break;
+
+                default:
+                    throw new RuntimeException('Unknown type', 7);
             }
         }
     }
@@ -166,6 +173,25 @@ class ProductRepository extends ServiceEntityRepository
     public function getProductsArray(): array
     {
         return $this->findAll();
+    }
+
+    /**
+     * @return int
+     */
+    public function getPageSize(): int
+    {
+        return $this->pageSize;
+    }
+
+    public function pagProducts(array $products, \Knp\Component\Pager\PaginatorInterface $paginator,
+                                Request $request): \Knp\Component\Pager\Pagination\PaginationInterface
+    {
+        return $paginator->paginate(
+            $products,
+            $request->query->getInt('page', 1),
+            $this->getPageSize()
+        );
+
     }
 
 }
