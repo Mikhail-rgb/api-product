@@ -75,7 +75,7 @@ class ApiController extends AbstractController
     {
         $this->productRepository->deleteByID($id);
 
-        return new JsonResponse(['message' => "Product with id = $id deleted"]);
+        return new JsonResponse(['message' => "Product with id $id deleted"]);
     }
 
     /**
@@ -85,7 +85,7 @@ class ApiController extends AbstractController
     {
         $this->productRepository->deleteBySKU($sku);
 
-        return new JsonResponse(['message' => "Product(s) with sku = $sku deleted"]);
+        return new JsonResponse(['message' => "Product(s) with sku $sku deleted"]);
     }
 
     /**
