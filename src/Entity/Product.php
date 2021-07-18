@@ -5,8 +5,8 @@ namespace App\Entity;
 
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Boolean;
 use RuntimeException;
+use App\Enum\ErrorCodeEnum;
 
 /**
  * @ORM\Entity(repositoryClass=ProductRepository::class)
@@ -57,7 +57,10 @@ class Product
     public function getId(): int
     {
         if ($this->id === null) {
-            throw new RuntimeException('Product creation failed', 1);
+            throw new RuntimeException(
+                'Product creation failed',
+                ErrorCodeEnum::CREATION_FAILED
+            );
         }
 
         return $this->id;
@@ -65,9 +68,11 @@ class Product
 
     public function setTitle(string $title): void
     {
-        if(!$title)
-        {
-            throw new RuntimeException('Product title not specified', 2);
+        if (!$title) {
+            throw new RuntimeException(
+                'Product title not specified',
+                ErrorCodeEnum::PROPERTY_NOT_SPECIFIED
+            );
         }
 
         $this->title = $title;
@@ -76,13 +81,16 @@ class Product
 
     public function setAmount(int $amount): void
     {
-        if($amount === null)
-        {
-            throw new RuntimeException('Product amount not specified', 2);
-        }
-        else if($amount < 0)
-        {
-            throw new RuntimeException('Product amount cannot be negative', 3);
+        if ($amount === null) {
+            throw new RuntimeException(
+                'Product amount not specified',
+                ErrorCodeEnum::PROPERTY_NOT_SPECIFIED
+            );
+        } else if ($amount < 0) {
+            throw new RuntimeException(
+                'Product amount cannot be negative',
+                ErrorCodeEnum::NEGATIVE_AMOUNT
+            );
         }
 
         $this->amount = $amount;
@@ -98,9 +106,11 @@ class Product
 
     public function setType(string $type): void
     {
-        if(!$type)
-        {
-            throw new RuntimeException('Product type not specified', 2);
+        if (!$type) {
+            throw new RuntimeException(
+                'Product type not specified',
+                ErrorCodeEnum::PROPERTY_NOT_SPECIFIED
+            );
         }
 
         $this->type = $type;
@@ -109,9 +119,11 @@ class Product
 
     public function setSku(string $sku): void
     {
-        if(!$sku)
-        {
-            throw new RuntimeException('Product SKU not specified', 2);
+        if (!$sku) {
+            throw new RuntimeException(
+                'Product SKU not specified',
+                ErrorCodeEnum::PROPERTY_NOT_SPECIFIED
+            );
         }
 
         $this->sku = $sku;
@@ -123,24 +135,20 @@ class Product
         return $this->sku;
     }
 
-
     public function getTitle(): string
     {
         return $this->title;
     }
-
 
     public function getAmount(): int
     {
         return $this->amount;
     }
 
-
     public function getCurrency(): string
     {
         return $this->currency;
     }
-
 
     public function getType(): string
     {
@@ -149,21 +157,30 @@ class Product
 
     private function checkCurrency(string $currency): void
     {
-        if(!$currency)
-        {
-            throw new RuntimeException('Product currency not specified', 2);
+        if (!$currency) {
+            throw new RuntimeException(
+                'Product currency not specified',
+                ErrorCodeEnum::PROPERTY_NOT_SPECIFIED
+            );
         }
 
         $usableCurrency = array(
-        "rub" => "rub",
-        "usd" => "usd",
-        "eur" => "eur",
+            "rub" => "rub",
+            "usd" => "usd",
+            "eur" => "eur",
         );
 
-        if(!in_array($currency, $usableCurrency))
-        {
-            throw new RuntimeException('Unusable currency', 4);
+        if (!in_array($currency, $usableCurrency)) {
+            throw new RuntimeException(
+                sprintf(
+                    'Unknown currency. Expected one of this: `%s`, `%s`, `%s`. Input currency `%s`.',
+                    $usableCurrency['rub'],
+                    $usableCurrency['usd'],
+                    $usableCurrency['eur'],
+                    $currency
+                ),
+                ErrorCodeEnum::UNKNOWN_PROPERTY
+            );
         }
     }
-
 }

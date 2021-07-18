@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Product;
+use App\Enum\ErrorCodeEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use RuntimeException;
 
 /**
@@ -19,7 +19,6 @@ use RuntimeException;
  */
 class ProductRepository extends ServiceEntityRepository
 {
-    //max amount of elements on page
     private int $pageSize = 5;
 
     public function __construct(ManagerRegistry $registry)
@@ -29,7 +28,6 @@ class ProductRepository extends ServiceEntityRepository
 
     public function create(string $sku, string $title, int $amount, string $currency, string $type): Product
     {
-        //If products with different types have the same SKU -> error
         $this->checkSkuAndType($sku, $type);
 
         $product = new Product($sku, $title, $amount, $currency, $type);
@@ -41,27 +39,33 @@ class ProductRepository extends ServiceEntityRepository
 
     private function checkSkuAndType(string $sku, string $type): void
     {
-        $products = $this->findBy(['sku' => $sku]);
-        $productsAmount = count($products);
+        $product = $this->findOneBy(['sku' => $sku]);
 
-        if($productsAmount >= 1)
-        {
-            foreach ($products as $product)
-            {
-                if($product->getType() != $type)
-                {
-                    throw new RuntimeException('The same SKU with different types', 5);
-                }
-            }
+        if ($product && $product->getType() !== $type) {
+            throw new RuntimeException(
+                sprintf(
+                    'Products with SKU `%s` has type `%s`.',
+                    $sku,
+                    $product->getType()
+                ),
+                ErrorCodeEnum::SAME_SKU_DIFFERENT_TYPES
+            );
         }
     }
 
+    /**
+     * @param string $sku
+     * @return Product[]
+     */
     public function findBySKU(string $sku): array
     {
         $products = $this->findBy(['sku' => $sku]);
 
         if (!$products) {
-            throw new RuntimeException('Product sku not found', 6);
+            throw new RuntimeException(
+                'Product sku not found',
+                ErrorCodeEnum::PROPERTY_NOT_FOUND
+            );
         }
 
         return $products;
@@ -72,7 +76,10 @@ class ProductRepository extends ServiceEntityRepository
         $product = $this->find($id);
 
         if (!$product) {
-            throw new RuntimeException('Product id not found', 6);
+            throw new RuntimeException(
+                'Product id not found',
+                ErrorCodeEnum::PROPERTY_NOT_FOUND
+            );
         }
 
         return $product;
@@ -83,7 +90,10 @@ class ProductRepository extends ServiceEntityRepository
         $product = $this->find($id);
 
         if (!$product) {
-            throw new RuntimeException('Product id not found', 6);
+            throw new RuntimeException(
+                'Product id not found',
+                ErrorCodeEnum::PROPERTY_NOT_FOUND
+            );
         }
 
         $this->update($product, $body);
@@ -92,16 +102,23 @@ class ProductRepository extends ServiceEntityRepository
         return $product;
     }
 
+    /**
+     * @param string $sku
+     * @param array $body
+     * @return Product[]
+     */
     public function updateBySKU(string $sku, array $body): array
     {
         $products = $this->findBy(['sku' => $sku]);
 
         if (!$products) {
-            throw new RuntimeException('Product sku not found', 6);
+            throw new RuntimeException(
+                'Product sku not found',
+                ErrorCodeEnum::PROPERTY_NOT_FOUND
+            );
         }
 
-        foreach($products as $product)
-        {
+        foreach ($products as $product) {
             $this->update($product, $body);
             $this->save($product);
         }
@@ -114,7 +131,10 @@ class ProductRepository extends ServiceEntityRepository
         $product = $this->find($id);
 
         if (!$product) {
-            throw new RuntimeException('Product id not found', 6);
+            throw new RuntimeException(
+                'Product id not found',
+                ErrorCodeEnum::PROPERTY_NOT_FOUND
+            );
         }
 
         $this->delete($product);
@@ -125,35 +145,44 @@ class ProductRepository extends ServiceEntityRepository
         $products = $this->findBy(['sku' => $sku]);
 
         if (!$products) {
-            throw new RuntimeException('Product sku not found', 6);
+            throw new RuntimeException(
+                'Product sku not found',
+                ErrorCodeEnum::PROPERTY_NOT_FOUND
+            );
         }
 
-        foreach($products as $product)
-        {
+        foreach ($products as $product) {
             $this->delete($product);
         }
     }
 
-    private function update(Product $product, array $body):void
+    private function update(Product $product, array $body): void
     {
-        foreach($body as $key => $value)
-        {
-            switch ($key)
-            {
+        foreach ($body as $key => $value) {
+            switch ($key) {
                 case "sku":
                     $this->checkSkuAndType($value, $product->getType());
                     $product->setSku($value);
                     break;
-                case "title": $product->setTitle($value); break;
-                case "amount": $product->setAmount((int)$value); break;
-                case "currency": $product->setCurrency($value); break;
+                case "title":
+                    $product->setTitle($value);
+                    break;
+                case "amount":
+                    $product->setAmount((int)$value);
+                    break;
+                case "currency":
+                    $product->setCurrency($value);
+                    break;
                 case "type":
                     $this->checkSkuAndType($product->getSku(), $value);
                     $product->setType($value);
                     break;
 
                 default:
-                    throw new RuntimeException('Unknown type', 7);
+                    throw new RuntimeException(
+                        'Unknown property',
+                        ErrorCodeEnum::UNKNOWN_PROPERTY
+                    );
             }
         }
     }
@@ -170,34 +199,36 @@ class ProductRepository extends ServiceEntityRepository
         $this->_em->flush();
     }
 
+    /**
+     * @return Product[]
+     */
     public function getProductsArray(): array
     {
         $products = $this->findAll();
-        if(!$products)
-        {
-            throw new RuntimeException('Products not found' , 6);
+        if (!$products) {
+            throw new RuntimeException(
+                'Products not found',
+                ErrorCodeEnum::PROPERTY_NOT_FOUND
+            );
         }
 
         return $products;
     }
 
-    /**
-     * @return int
-     */
+
     public function getPageSize(): int
     {
         return $this->pageSize;
     }
 
-    public function paginationProducts(array $products, \Knp\Component\Pager\PaginatorInterface $paginator,
-                                       int $page): \Knp\Component\Pager\Pagination\PaginationInterface
+    public function paginationProducts(array $products, PaginatorInterface $paginator,
+                                       int $page): PaginationInterface
     {
         return $paginator->paginate(
             $products,
             $page,
             $this->getPageSize()
         );
-
     }
 
 }

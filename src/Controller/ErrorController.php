@@ -12,9 +12,9 @@ class ErrorController
     public function error(Throwable $exception): JsonResponse
     {
         return new JsonResponse([
-            'code' => $exception->getCode(),
-            'message' => $exception->getMessage(),
-        ]
+                'code' => $exception->getCode(),
+                'message' => $exception->getMessage(),
+            ]
         );
     }
 }
