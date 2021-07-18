@@ -5,6 +5,7 @@ namespace App\Repository;
 
 use App\Entity\Product;
 use App\Enum\ErrorCodeEnum;
+use App\Validator\ProductValidator;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Knp\Component\Pager\Pagination\PaginationInterface;
@@ -24,6 +25,11 @@ class ProductRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Product::class);
+    }
+
+    public function checkBeforeCreation(array $inputProperties, ProductValidator $validator): void
+    {
+        $validator->checkRequiredProperties($inputProperties);
     }
 
     public function create(string $sku, string $title, int $amount, string $currency, string $type): Product
@@ -180,7 +186,10 @@ class ProductRepository extends ServiceEntityRepository
 
                 default:
                     throw new RuntimeException(
-                        'Unknown property',
+                        sprintf(
+                            'Unknown property %s',
+                            $key
+                        ),
                         ErrorCodeEnum::UNKNOWN_PROPERTY
                     );
             }
@@ -221,8 +230,11 @@ class ProductRepository extends ServiceEntityRepository
         return $this->pageSize;
     }
 
-    public function paginationProducts(array $products, PaginatorInterface $paginator,
-                                       int $page): PaginationInterface
+    public function paginationProducts(
+        array $products,
+        PaginatorInterface $paginator,
+        int $page
+    ): PaginationInterface
     {
         return $paginator->paginate(
             $products,

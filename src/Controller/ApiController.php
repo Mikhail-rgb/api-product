@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Repository\ProductRepository;
+use App\Validator\ProductValidator;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,11 +18,13 @@ class ApiController extends AbstractController
 {
     private ProductRepository $productRepository;
     private SerializerInterface $serializer;
+    private ProductValidator $validator;
 
-    public function __construct(ProductRepository $productRepository, SerializerInterface $serializer)
+    public function __construct(ProductRepository $productRepository, SerializerInterface $serializer, ProductValidator $validator)
     {
         $this->productRepository = $productRepository;
         $this->serializer = $serializer;
+        $this->validator = $validator;
     }
 
     /**
@@ -30,7 +33,7 @@ class ApiController extends AbstractController
     public function createProduct(Request $request): Response
     {
         $body = json_decode((string)$request->getContent(), true);
-
+        $this->productRepository->checkBeforeCreation($body, $this->validator);
         $product = $this->productRepository->create(
             $body['sku'],
             $body['title'],
