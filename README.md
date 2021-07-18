@@ -131,9 +131,8 @@ http://127.0.0.1:8000/api/product/sku/{sku}
 ```json
 {
     "code": 4,
-    "message": "Unusable currency"
+    "message": "Unknown currency. Expected one of this: `rub`, `usd`, `eur`. Input currency `sss`."
 }
-
 ```
 
 ___
